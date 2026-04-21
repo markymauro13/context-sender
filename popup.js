@@ -62,17 +62,98 @@ let currentKey = null;
 // Jira helpers
 // ---------------------------------------------------------------------------
 
-function adfToPlaintext(node) {
+function adfToPlaintext(node, ctx) {
   if (!node) return "";
-  if (node.type === "text") return node.text || "";
-  if (!node.content) return "";
-  return node.content.map(child => {
-    const text = adfToPlaintext(child);
-    if (child.type === "paragraph" || child.type === "heading") return text + "\n";
-    if (child.type === "listItem") return "- " + text + "\n";
-    if (child.type === "codeBlock") return "```\n" + text + "\n```\n";
-    return text;
-  }).join("");
+  ctx = ctx || {};
+
+  switch (node.type) {
+    case "text": {
+      let t = node.text || "";
+      const marks = node.marks || [];
+      if (marks.some(m => m.type === "strike")) return "";
+      const link = marks.find(m => m.type === "link");
+      if (link?.attrs?.href && link.attrs.href !== t) t += ` (${link.attrs.href})`;
+      else if (link?.attrs?.href) t = link.attrs.href;
+      return t;
+    }
+    case "hardBreak":
+      return "\n";
+    case "mention":
+      return node.attrs?.text || "@unknown";
+    case "emoji":
+      return node.attrs?.shortName || node.attrs?.text || "";
+    case "inlineCard":
+    case "blockCard":
+    case "embedCard":
+      return node.attrs?.url || node.attrs?.data?.url || "";
+    case "mediaGroup":
+    case "mediaSingle":
+    case "media":
+      return "[media]";
+    case "rule":
+      return "---\n";
+  }
+
+  const children = node.content;
+  if (!children) return "";
+
+  switch (node.type) {
+    case "paragraph":
+    case "heading":
+      return children.map(c => adfToPlaintext(c, ctx)).join("") + "\n";
+
+    case "blockquote":
+      return children.map(c => adfToPlaintext(c, ctx)).join("")
+        .split("\n").filter(l => l !== "").map(l => "> " + l).join("\n") + "\n";
+
+    case "codeBlock":
+      return "```\n" + children.map(c => adfToPlaintext(c, ctx)).join("") + "\n```\n";
+
+    case "bulletList":
+    case "taskList":
+      return children.map(c => adfToPlaintext(c, { ...ctx, listStyle: "bullet" })).join("");
+
+    case "orderedList": {
+      let out = "";
+      children.forEach((c, i) => {
+        out += adfToPlaintext(c, { ...ctx, listStyle: "ordered", listIndex: i + 1 });
+      });
+      return out;
+    }
+
+    case "taskItem": {
+      const body = children.map(c => adfToPlaintext(c, ctx)).join("").trim();
+      if (!body) return "";
+      const done = node.attrs?.state === "DONE";
+      return (done ? "[x] " : "[ ] ") + body + "\n";
+    }
+
+    case "listItem": {
+      const body = children.map(c => adfToPlaintext(c, ctx)).join("").trim();
+      if (!body) return "";
+      const prefix = ctx.listStyle === "ordered" ? `${ctx.listIndex || 1}. ` : "- ";
+      return prefix + body + "\n";
+    }
+
+    case "panel": {
+      const panelType = node.attrs?.panelType;
+      const label = panelType && panelType !== "info" ? `[${panelType.toUpperCase()}] ` : "";
+      return label + children.map(c => adfToPlaintext(c, ctx)).join("");
+    }
+
+    case "table":
+      return children.map(c => adfToPlaintext(c, ctx)).join("");
+
+    case "tableRow":
+      return children.map(c => adfToPlaintext(c, ctx).trimEnd()).join(" | ") + "\n";
+
+    case "tableHeader":
+    case "tableCell":
+      return children.map(c => adfToPlaintext(c, ctx)).join("").trimEnd();
+
+    default:
+      return children.map(c => adfToPlaintext(c, ctx)).join("");
+  }
 }
 
 function parseDescription(field) {
@@ -110,7 +191,7 @@ function formatJiraTicket(issueKey, json) {
 async function fetchJiraTicket(parsed) {
   if (cachedContent && currentKey === parsed.issueKey) return cachedContent;
 
-  const url = `${parsed.origin}/rest/api/2/issue/${parsed.issueKey}?fields=summary,description,comment`;
+  const url = `${parsed.origin}/rest/api/3/issue/${parsed.issueKey}?fields=summary,description,comment`;
   const resp = await fetch(url, { credentials: "include" });
 
   if (!resp.ok) {
