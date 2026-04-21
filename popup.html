@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Diff Sender</h1>
+
+    <div id="state-detecting" class="state">
+      <p class="muted">Checking current page…</p>
+    </div>
+
+    <div id="state-not-mr" class="state hidden">
+      <p class="muted">Navigate to a GitLab merge request to get started.</p>
+    </div>
+
+    <div id="state-ready" class="state hidden">
+      <p id="mr-info" class="mr-info"></p>
+      <div class="actions">
+        <button id="btn-copy" class="btn primary">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5" y="1" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="4" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="var(--bg)"/></svg>
+          Copy to Clipboard
+        </button>
+        <button id="btn-download" class="btn secondary">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v9m0 0l-3-3m3 3l3-3M2 13h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download .txt
+        </button>
+      </div>
+    </div>
+
+    <div id="state-loading" class="state hidden">
+      <div class="spinner"></div>
+      <p class="muted">Fetching diff…</p>
+    </div>
+
+    <div id="state-success" class="state hidden">
+      <p class="success">&#10003; Done!</p>
+    </div>
+
+    <div id="state-error" class="state hidden">
+      <p class="error" id="error-msg"></p>
+      <button id="btn-retry" class="btn secondary">Retry</button>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
