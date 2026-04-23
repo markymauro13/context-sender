@@ -129,3 +129,41 @@ h1 {
 .state {
   text-align: center;
 }
+
+.detected-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.detected-row .mr-info {
+  margin-bottom: 0;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge.gitlab { background: #fc6d26; color: #fff; }
+.badge.github { background: #238636; color: #fff; }
+.badge.jira   { background: #0052cc; color: #fff; }
+
+.footer {
+  padding: 10px 20px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
+.footer-text {
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.6;
+}

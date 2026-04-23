@@ -17,7 +17,10 @@
     </div>
 
     <div id="state-ready" class="state hidden">
-      <p id="mr-info" class="mr-info"></p>
+      <div class="detected-row">
+        <span id="platform-badge" class="badge"></span>
+        <p id="mr-info" class="mr-info"></p>
+      </div>
       <div class="actions">
         <button id="btn-copy" class="btn primary">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5" y="1" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="4" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="var(--bg)"/></svg>
@@ -44,6 +47,9 @@
       <button id="btn-retry" class="btn secondary">Retry</button>
     </div>
   </div>
+  <footer class="footer">
+    <span class="footer-text">Diff Sender v1.0.0</span>
+  </footer>
   <script src="popup.js"></script>
 </body>
 </html>
