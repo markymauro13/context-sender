@@ -293,6 +293,9 @@ async function init() {
     return;
   }
 
+  const badge = document.getElementById("platform-badge");
+  badge.textContent = parsed.platform === "jira" ? "Jira" : parsed.platform === "github" ? "GitHub" : "GitLab";
+  badge.classList.add(parsed.platform);
   mrInfo.textContent = `${parsed.label} detected`;
   showState("ready");
 
